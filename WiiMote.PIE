@@ -1,0 +1,156 @@
+﻿PIE.FrameRate = 120hz
+debug = var.jump
+
+if (wiimote.RawForceY < 0) {
+   if (var.jump < wiimote.RawForceY){
+   }else{
+    var.jump = wiimote.RawForceY
+   }
+}
+
+
+if wiimote.One{
+var.KITTstart = true
+}
+
+if wiimote.Two{
+var.oldPitch = wiimote.MotionPlus.GyroPitch
+var.oldRoll = wiimote.MotionPlus.GyroRoll
+var.KITTstart = false
+}
+
+
+var.Roll = wiimote.MotionPlus.GyroRoll - var.oldRoll
+var.Pitch = wiimote.MotionPlus.GyroPitch - var.oldPitch
+var.RollSpeed = wiimote.MotionPlus.RollSpeed
+var.KITTspeed = 100 ms
+
+
+
+if wiimote.Plus{
+var.Start = true
+}
+if wiimote.Minus{
+var.Start = false
+}
+
+keyboard.Left = wiimote.left
+keyboard.Right = wiimote.right
+mouse.WheelDown = wiimote.Down
+mouse.WheelUp = wiimote.Up
+
+if var.Start{
+wiimote.Rumble = (var.RollSpeed < -300)
+wiimote.led1 = true
+wiimote.led2 = true
+wiimote.led3 = true
+wiimote.led4 = true
+keyboard.Ctrl = wiimote.A
+
+H = (var.Roll >10 and var.Roll < 20)
+U = (var.Roll >20 and var.Roll < 40)
+J = (var.Roll < -10 and var.Roll > -20)
+I = (var.Roll < -20 and var.Roll > -40)
+W = (var.Roll > 40)
+S = (var.Roll < -40)
+
+K = (var.Pitch > 5 and var.Pitch < 10)
+O = (var.Pitch > 10 and var.Pitch < 20)//O = (var.Pitch > 10)//O = (var.Pitch > 10 and var.Pitch < 20)
+L = (var.Pitch < -5 and var.Pitch > -10)
+P = (var.Pitch < -10 and var.Pitch > -20)//P = (var.Pitch < -10)//P = (var.Pitch < -10 and var.Pitch < -20)
+A = (var.Pitch < -20)
+D = (var.Pitch > 20)
+
+Space = (wiimote.RawForceY < -5)
+}else{
+
+//K.I.T.T. Led beleuchtung// Dies wurde nicht vom Projektteam programmiert.
+
+if var.KITTstart{
+   if var.kitt = 0 then
+   wiimote.Leds = 1
+   endif
+   if var.kitt = 1 then
+   wiimote.Leds = 3
+   endif
+   if var.kitt = 2 then
+   wiimote.Leds = 6
+   endif
+   if var.kitt = 3 then
+   wiimote.Leds = 12
+   endif
+   if var.kitt = 4 then
+   wiimote.Leds = 8
+   endif
+   if var.kitt = 5 then
+   wiimote.Leds = 12
+   endif
+   if var.kitt = 6 then
+   wiimote.Leds = 6
+   endif
+   if var.kitt = 7 then
+   wiimote.Leds = 3
+   endif
+   wait var.KITTspeed
+   var.kitt = (var.kitt + 1) % 8
+}else{
+wiimote.led1 = true
+wiimote.led2 = false
+wiimote.led3 = false
+wiimote.led4 = false
+}
+
+}
+
+
+
+
+
+var.MoveButton = wiimote.B
+mouse.LeftButton = wiimote.A
+
+
+var.Speed = 75   // 0 to 100
+
+
+//Die Maussteuerung wurde nicht vom Projektteam selbst programmiert
+if wiimote.HasMotionPlus = true and var.MoveButton = true {
+   var.YawSpeed = wiimote.MotionPlus.YawSpeed
+   var.PitchSpeed = wiimote.MotionPlus.PitchSpeed
+   if SameValue( Smooth(wiimote.SmoothRoll, 10), wiimote.SmoothRoll, 10) then var.Roll = Smooth(wiimote.SmoothRoll, 10) else var.Roll = wiimote.SmoothRoll
+   if var.Roll < 0 and var.Roll >= -90 {
+      var.XYswap = 1 - EnsureMapRange(var.Roll, -90, 0, 0, 1)
+      var.RightDown = -1
+      var.TopUp = 1
+   }
+   if var.Roll <= 90 and var.Roll >= 0 {
+      var.XYswap = 1 - EnsureMapRange(var.Roll, 90, 0, 0, 1)
+      var.RightDown = 1
+      var.TopUp = 1
+   }
+   if var.Roll > 90 and var.Roll <= 180 {
+      var.XYswap = 1 - EnsureMapRange(var.Roll, 90, 180, 0, 1)
+      var.RightDown = 1
+      var.TopUp = -1
+   }
+   if var.Roll < -90 and var.Roll >= -180 {
+      var.XYswap = 1 - EnsureMapRange(var.Roll, -90, -180, 0, 1)
+      var.RightDown = -1
+      var.TopUp = -1
+   }
+   var.SpeedX = var.TopUp * var.YawSpeed - ( var.TopUp * var.YawSpeed * var.XYswap ) + ( var.RightDown * var.PitchSpeed * var.XYswap )
+   var.SpeedY = var.TopUp * var.PitchSpeed - ( var.TopUp * var.PitchSpeed * var.XYswap) + ( -var.RightDown * var.YawSpeed * var.XYswap )
+   mouse.DirectInputX = int(var.MouseX)
+   mouse.DirectInputY = int(var.MouseY)
+   var.MouseX = var.MouseX + ( var.SpeedX / (10500000 - EnsureMapRange(var.Speed, 0, 100, 0, 10000000) ) )
+   var.MouseY = var.MouseY - ( var.SpeedY / (10500000 - EnsureMapRange(var.Speed, 0, 100, 0, 10000000) ) )
+
+}
+if var.MoveButton = false {
+   var.MouseX = mouse.DirectInputX
+   var.MouseY = mouse.DirectInputY
+
+}
+
+
+
